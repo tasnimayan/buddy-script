@@ -9,6 +9,7 @@ import { logger } from "./lib/logger.js";
 import { notFoundHandler } from "./middleware/not-found.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import healthRoutes from "./modules/health/routes.js";
+import authRoutes from "./modules/auth/routes.js";
 
 import type { IncomingMessage, ServerResponse } from "node:http";
 
@@ -43,6 +44,7 @@ app.use(
 );
 
 app.use("/api", healthRoutes);
+app.use("/api/v1/auth", authRoutes);
 
 app.use(notFoundHandler);
 

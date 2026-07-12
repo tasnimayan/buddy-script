@@ -61,13 +61,14 @@ model Profile {
   avatarMediaKey  String?  @map("avatar_media_key") @db.VarChar(512) // object storage key, nullable
   bio             String?  @db.VarChar(500)
   dob             DateTime? @db.Date
-  gender          Gender
+  gender          Gender?
   location        String?
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId], map: "idx_profiles_user")
   @@map("profiles")
 }
 
@@ -92,7 +93,7 @@ model Post {
   authorId     String     @map("author_id") @db.Uuid
   content      String?    // nullable if media-only post
   visibility   Visibility @default(public)
-  mediaCount   Int        @default(0) @map("media_count") // denormalized, avoids a join to know "has media"
+  mediaCount   Int        @default(0) @map("media_count")
   likeCount    BigInt     @default(0) @map("like_count")
   commentCount BigInt     @default(0) @map("comment_count")
   createdAt    DateTime   @default(now()) @map("created_at")
@@ -100,7 +101,7 @@ model Post {
   deletedAt    DateTime?  @map("deleted_at")
 
   author   User        @relation(fields: [authorId], references: [id])
-  media    PostMedia[]
+  media    Media[]
   comments Comment[]
   likes    PostLike[]
 
@@ -109,10 +110,10 @@ model Post {
   @@map("posts")
 }
 
-model PostMedia {
+model Media {
   id         BigInt    @id
   postId     BigInt    @map("post_id")
-  storageKey String    @map("storage_key") @db.VarChar(512) // object storage key, NOT a URL
+  storageKey String    @map("storage_key") @db.VarChar(512) // object storage key
   mediaType  MediaType @map("media_type")
   extension  String    @db.VarChar(10)
   byteSize   BigInt    @map("byte_size")
@@ -123,16 +124,16 @@ model PostMedia {
 
   @@unique([postId, position]) // prevents ordering collisions
   @@index([postId], map: "idx_post_media_order")
-  @@map("post_media")
+  @@map("media")
 }
 
 model Comment {
   id               BigInt    @id
   postId           BigInt    @map("post_id")
-  authorId         String    @map("author_id") @db.Uuid // corrected from BIGINT -> Uuid to match users.id
+  authorId         String    @map("author_id") @db.Uuid
   parentCommentId  BigInt?   @map("parent_comment_id") // NULL = top-level comment
   content          String?   // nullable if image-only comment
-  mediaKey         String?   @map("media_key") @db.VarChar(512) // single optional image, storage key
+  mediaKey         String?   @map("media_key") @db.VarChar(512)
   likeCount        BigInt    @default(0) @map("like_count")
   replyCount       BigInt    @default(0) @map("reply_count") // meaningful on top-level comments only
   createdAt        DateTime  @default(now()) @map("created_at")
@@ -146,14 +147,14 @@ model Comment {
   likes         CommentLike[]
 
 
-  @@index([postId, createdAt, id], map: "idx_comments_toplevel") // WHERE parent_comment_id IS NULL in DDL (partial)
+  @@index([postId, createdAt, id], map: "idx_comments_toplevel")
   @@index([parentCommentId, createdAt, id], map: "idx_comments_replies")
   @@map("comments")
 }
 
 model PostLike {
   postId    BigInt   @map("post_id")
-  userId    String   @map("user_id") @db.Uuid // corrected from BIGINT -> Uuid to match users.id
+  userId    String   @map("user_id") @db.Uuid
   createdAt DateTime @default(now()) @map("created_at")
 
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
@@ -166,7 +167,7 @@ model PostLike {
 
 model CommentLike {
   commentId BigInt   @map("comment_id")
-  userId    String   @map("user_id") @db.Uuid // corrected from BIGINT -> Uuid to match users.id
+  userId    String   @map("user_id") @db.Uuid
   createdAt DateTime @default(now()) @map("created_at")
 
   comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)

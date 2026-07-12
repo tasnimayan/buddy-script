@@ -73,7 +73,7 @@ model Profile {
 }
 
 model AuthSession {
-  id               BigInt    @id
+  id               BigInt    @id @default(dbgenerated("snowflake_id()"))
   userId           String    @map("user_id") @db.Uuid
   sessionTokenHash String    @unique @map("session_token_hash") @db.VarChar(255) // SHA-256 of opaque token
   userAgent        String?   @map("user_agent") @db.VarChar(255)
@@ -89,7 +89,7 @@ model AuthSession {
 }
 
 model Post {
-  id           BigInt     @id
+  id           BigInt     @id @default(dbgenerated("snowflake_id()"))
   authorId     String     @map("author_id") @db.Uuid
   content      String?    // nullable if media-only post
   visibility   Visibility @default(public)
@@ -105,13 +105,16 @@ model Post {
   comments Comment[]
   likes    PostLike[]
 
-  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "idx_posts_public_feed")
-  @@index([authorId, createdAt(sort: Desc)], map: "idx_posts_by_author")
+//   @@index([createdAt(sort: Desc), id(sort: Desc)], map: "idx_posts_public_feed")
+//   @@index([authorId, createdAt(sort: Desc)], map: "idx_posts_by_author")
+  // Partial indexes created in raw SQL migration (not expressible in Prisma):
+  // idx_posts_public_feed: (created_at DESC, id DESC) WHERE visibility = 'public' AND deleted_at IS NULL
+  // idx_posts_by_author: (author_id, created_at DESC, id DESC) WHERE deleted_at IS NULL
   @@map("posts")
 }
 
 model Media {
-  id         BigInt    @id
+  id         BigInt    @id @default(dbgenerated("snowflake_id()"))
   postId     BigInt    @map("post_id")
   storageKey String    @map("storage_key") @db.VarChar(512) // object storage key
   mediaType  MediaType @map("media_type")
@@ -128,7 +131,7 @@ model Media {
 }
 
 model Comment {
-  id               BigInt    @id
+  id               BigInt    @id @default(dbgenerated("snowflake_id()"))
   postId           BigInt    @map("post_id")
   authorId         String    @map("author_id") @db.Uuid
   parentCommentId  BigInt?   @map("parent_comment_id") // NULL = top-level comment
@@ -146,9 +149,11 @@ model Comment {
   replies       Comment[] @relation("CommentReplies")
   likes         CommentLike[]
 
-
-  @@index([postId, createdAt, id], map: "idx_comments_toplevel")
-  @@index([parentCommentId, createdAt, id], map: "idx_comments_replies")
+//   @@index([postId, createdAt, id], map: "idx_comments_toplevel")
+//   @@index([parentCommentId, createdAt, id], map: "idx_comments_replies")
+  // Partial indexes created in raw SQL migration (not expressible in Prisma):
+  // idx_comments_toplevel: (post_id, created_at, id) WHERE parent_comment_id IS NULL AND deleted_at IS NULL
+  // idx_comments_replies: (parent_comment_id, created_at, id) WHERE deleted_at IS NULL
   @@map("comments")
 }
 

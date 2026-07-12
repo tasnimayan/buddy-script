@@ -1,19 +1,10 @@
 import { z } from "zod/v4";
+import { trimmedString, emailField } from "../../lib/validation.js";
 
-export const registerSchema = z.object({
-  firstName: z
-    .string()
-    .trim()
-    .min(1, "First name is required.")
-    .max(100, "First name must be at most 100 characters."),
-  lastName: z
-    .string()
-    .trim()
-    .min(1, "Last name is required.")
-    .max(100, "Last name must be at most 100 characters."),
-  email: z
-    .email("Invalid email address.")
-    .transform((v) => v.toLowerCase()),
+export const registerSchema = z.strictObject({
+  firstName: trimmedString(1, 100, "First name"),
+  lastName: trimmedString(1, 100, "Last name"),
+  email: emailField,
   password: z
     .string()
     .min(8, "Password must be at least 8 characters.")
@@ -22,3 +13,11 @@ export const registerSchema = z.object({
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
+
+export const loginSchema = z.strictObject({
+  email: emailField,
+  password: z.string().min(1, "Password is required.").max(128),
+  rememberMe: z.boolean().optional().default(false),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;

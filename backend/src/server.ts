@@ -49,3 +49,15 @@ async function shutdown(signal: string) {
 
 process.on("SIGTERM", () => void shutdown("SIGTERM"));
 process.on("SIGINT", () => void shutdown("SIGINT"));
+
+// Handle uncaught exceptions
+process.on("uncaughtException", (error: Error) => {
+  logger.error({ error }, "Uncaught Exception");
+  process.exit(1);
+});
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (reason, promise) => {
+  logger.error(`Unhandled Rejection at: ${promise} reason: ${reason}`);
+  process.exit(1);
+});

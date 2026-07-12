@@ -1,8 +1,9 @@
 import { Redis } from "ioredis";
 import { env } from "../config/env.js";
 import { logger } from "../lib/logger.js";
+import type { RedisOptions } from "ioredis";
 
-function createClient(name: string): Redis {
+function createClient(name: string, overrides: RedisOptions = {}): Redis {
   const useTls = env.REDIS_URL.startsWith("rediss://");
 
   const client = new Redis(env.REDIS_URL, {
@@ -14,6 +15,7 @@ function createClient(name: string): Redis {
       return delay;
     },
     ...(useTls ? { tls: { rejectUnauthorized: false } } : {}),
+    ...overrides,
   });
 
   client.on("connect", () => {
@@ -38,5 +40,9 @@ function createClient(name: string): Redis {
 // Shared connection for caching and general use
 export const redis = createClient("shared");
 
-// Dedicated connection for rate limiting
-export const redisRateLimit = createClient("rate-limit");
+// Dedicated connection for rate limiting. Offline queueing is disabled so
+// commands fail fast during a Redis outage and rate-limiter-flexible falls
+// back to its in-memory insurance limiter instead of hanging requests.
+export const redisRateLimit = createClient("rate-limit", {
+  enableOfflineQueue: false,
+});

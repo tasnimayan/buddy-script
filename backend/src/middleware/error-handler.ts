@@ -21,6 +21,16 @@ export class AppError extends Error {
   }
 }
 
+export class RateLimitError extends AppError {
+  readonly retryAfterSeconds: number;
+
+  constructor(retryAfterSeconds: number) {
+    super(429, "Too many attempts. Try again later.");
+    this.name = "RateLimitError";
+    this.retryAfterSeconds = Math.max(1, retryAfterSeconds);
+  }
+}
+
 const PRISMA_ERROR_MAP: Record<string, { status: number; message: string }> = {
   P2002: { status: 409, message: "A record with that value already exists." },
   P2025: { status: 404, message: "Record not found." },
@@ -35,6 +45,9 @@ export function errorHandler(
   const requestId = req.id as string | undefined;
 
   if (err instanceof AppError) {
+    if (err instanceof RateLimitError) {
+      res.set("Retry-After", String(err.retryAfterSeconds));
+    }
     const body: Record<string, unknown> = { message: err.message };
     if (err.code) body.code = err.code;
     if (err.details) body.details = { ...err.details, requestId };

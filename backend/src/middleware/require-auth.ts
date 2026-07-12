@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "../lib/jwt.js";
+import { AppError } from "./error-handler.js";
 
 declare module "express" {
   interface Request {
@@ -8,15 +9,40 @@ declare module "express" {
   }
 }
 
+/**
+ * Best-effort identification: verifies the access token if present and
+ * attaches userId/sessionId, but never rejects. Used ahead of the global
+ * rate limiter so authenticated traffic is keyed by user, not IP.
+ */
+export async function attachAuth(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+): Promise<void> {
+  const token = req.cookies?.access_token as string | undefined;
+
+  if (token) {
+    try {
+      const payload = await verifyAccessToken(token);
+      req.userId = payload.sub;
+      req.sessionId = payload.sid;
+    } catch {
+      // Invalid/expired token - proceed anonymous
+    }
+  }
+
+  next();
+}
+
 export async function requireAuth(
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction,
 ): Promise<void> {
   const token = req.cookies?.access_token as string | undefined;
 
   if (!token) {
-    res.status(401).json({ message: "Authentication required." });
+    next(new AppError(401, "Authentication required."));
     return;
   }
 
@@ -26,6 +52,6 @@ export async function requireAuth(
     req.sessionId = payload.sid;
     next();
   } catch {
-    res.status(401).json({ message: "Authentication required." });
+    next(new AppError(401, "Authentication required."));
   }
 }

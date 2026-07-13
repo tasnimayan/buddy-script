@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
+import { ResponseHandler } from "../lib/response.js";
 
 export function notFoundHandler(_req: Request, res: Response): void {
-  res.status(404).json({ message: "Not found" });
+  ResponseHandler.notFound(res);
 }

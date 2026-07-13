@@ -6,8 +6,8 @@ import {
   refreshSession,
   logoutUser,
   getCurrentUser,
-  type RequestMeta,
 } from "./auth.service.js";
+import { RequestMeta } from "./types.js";
 import {
   setAccessTokenCookie,
   setRefreshTokenCookie,
@@ -63,7 +63,7 @@ export async function login(req: Request, res: Response): Promise<void> {
       ipAddress: meta.ipAddress,
       requestId: meta.requestId,
     });
-    // Byte-identical body for unknown email / wrong password / deactivated.
+
     throw new AppError(401, "Invalid email or password.");
   }
 

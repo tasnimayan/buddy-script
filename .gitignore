@@ -5,9 +5,11 @@ node_modules/
 frontend/.next/
 frontend/out/
 frontend/build/
+frontend/docs
 
 # Express (backend)
 backend/dist/
+backend/docs
 
 # Environment variables
 .env
@@ -56,3 +58,4 @@ coverage/
 
 # Turbo / cache (if added later)
 .turbo/
+

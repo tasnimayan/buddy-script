@@ -8,20 +8,6 @@ import { AppError } from "../../middleware/error-handler.js";
 import { logger } from "../../lib/logger.js";
 
 export type UploadScope = "posts" | "comments";
-
-/**
- * The user ID is embedded in the signed folder, so the client cannot
- * redirect the upload into another user's namespace.
- */
-export function createUploadSignatures(
-  userId: string,
-  count: number,
-  scope: UploadScope,
-): UploadSignature[] {
-  const folder = `${scope}/${userId}`;
-  return Array.from({ length: count }, () => signUpload(folder, uuidv4()));
-}
-
 export interface VerifiedMedia {
   storageKey: string;
   bytes: number;

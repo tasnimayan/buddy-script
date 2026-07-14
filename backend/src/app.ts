@@ -14,6 +14,7 @@ import healthRoutes from "./modules/health/routes.js";
 import authRoutes from "./modules/auth/routes.js";
 import postsRoutes from "./modules/posts/routes.js";
 import commentsRoutes from "./modules/comments/routes.js";
+import feedRoutes from "./modules/feed/routes.js";
 
 import type { IncomingMessage, ServerResponse } from "node:http";
 
@@ -69,6 +70,7 @@ app.use("/api/v1", attachAuth, globalRateLimit);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/posts", postsRoutes);
 app.use("/api/v1/comments", commentsRoutes);
+app.use("/api/v1/feed", feedRoutes);
 
 app.use(notFoundHandler);
 

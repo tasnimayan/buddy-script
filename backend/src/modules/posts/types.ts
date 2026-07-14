@@ -1,5 +1,5 @@
 import { Visibility } from "@prisma/client";
-import type { CommentDto } from "../comments/dto.js";
+import type { CommentDto } from "../comments/types.js";
 
 export interface CreatePostParams {
   authorId: string;

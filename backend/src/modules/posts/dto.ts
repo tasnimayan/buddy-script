@@ -1,5 +1,5 @@
 import { buildImageUrl, buildAvatarUrl } from "../../lib/cloudinary.js";
-import type { CommentDto } from "../comments/dto.js";
+import type { CommentDto } from "../comments/types.js";
 import type {
   PostAuthorDto,
   PostDto,

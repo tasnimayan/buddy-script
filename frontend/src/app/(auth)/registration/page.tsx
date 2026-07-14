@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { LoginForm } from "@/components/auth/login-form";
+import { SignupForm } from "@/components/auth/signup-form";
 
-export default function Login() {
+export default function Register() {
   return (
-    <section className="_social_login_wrapper _layout_main_wrapper">
+    <section className="_social_registration_wrapper _layout_main_wrapper">
       <div className="_shape_one">
         <Image
           src="/images/shape1.svg"
@@ -54,43 +54,50 @@ export default function Login() {
           height={200}
         />
       </div>
-      <div className="_social_login_wrap">
+      <div className="_social_registration_wrap">
         <div className="container">
           <div className="row align-items-center">
             <div className="col-xl-8 col-lg-8 col-md-12 col-sm-12">
-              <div className="_social_login_left">
-                <div className="_social_login_left_image">
+              <div className="_social_registration_right">
+                <div className="_social_registration_right_image">
                   <Image
-                    src="/images/login.png"
-                    alt="Login illustration"
-                    className="_left_img"
+                    src="/images/registration.png"
+                    alt="Registration illustration"
                     width={800}
                     height={600}
                     priority
                   />
                 </div>
+                <div className="_social_registration_right_image_dark">
+                  <Image
+                    src="/images/registration1.png"
+                    alt="Registration illustration"
+                    width={800}
+                    height={600}
+                  />
+                </div>
               </div>
             </div>
             <div className="col-xl-4 col-lg-4 col-md-12 col-sm-12">
-              <div className="_social_login_content">
-                <div className="_social_login_left_logo _mar_b28">
+              <div className="_social_registration_content">
+                <div className="_social_registration_right_logo _mar_b28">
                   <Image
                     src="/images/logo.svg"
                     alt="Buddy Script logo"
-                    className="_left_logo"
+                    className="_right_logo"
                     width={160}
                     height={40}
                   />
                 </div>
-                <p className="_social_login_content_para _mar_b8">
-                  Welcome back
+                <p className="_social_registration_content_para _mar_b8">
+                  Get Started Now
                 </p>
-                <h4 className="_social_login_content_title _titl4 _mar_b50">
-                  Login to your account
+                <h4 className="_social_registration_content_title _titl4 _mar_b50">
+                  Registration
                 </h4>
                 <button
                   type="button"
-                  className="_social_login_content_btn _mar_b40"
+                  className="_social_registration_content_btn _mar_b40"
                 >
                   <Image
                     src="/images/google.svg"
@@ -98,19 +105,19 @@ export default function Login() {
                     className="_google_img"
                     width={20}
                     height={20}
-                  />
-                  <span>Or sign-in with google</span>
+                  />{" "}
+                  <span>Register with google</span>
                 </button>
-                <div className="_social_login_content_bottom_txt _mar_b40">
+                <div className="_social_registration_content_bottom_txt _mar_b40">
                   <span>Or</span>
                 </div>
-                <LoginForm />
+                <SignupForm />
                 <div className="row">
                   <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                    <div className="_social_login_bottom_txt">
-                      <p className="_social_login_bottom_txt_para">
-                        Dont have an account?{" "}
-                        <Link href="/registration">Create New Account</Link>
+                    <div className="_social_registration_bottom_txt">
+                      <p className="_social_registration_bottom_txt_para">
+                        Already have an account?{" "}
+                        <Link href="/login">Login</Link>
                       </p>
                     </div>
                   </div>

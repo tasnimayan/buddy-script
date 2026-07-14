@@ -24,7 +24,7 @@ export interface PostMediaDto {
 export interface PostDto {
   id: string;
   content: string | null;
-  visibility: "public" | "private";
+  visibility: Visibility;
   createdAt: string;
   media: PostMediaDto[];
   author: PostAuthorDto;
@@ -51,7 +51,7 @@ export interface PostMediaInput {
 export interface PostInput {
   id: bigint;
   content: string | null;
-  visibility: "public" | "private";
+  visibility: Visibility;
   createdAt: Date;
   likeCount: bigint;
   commentCount: bigint;

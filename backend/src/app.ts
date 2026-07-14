@@ -12,6 +12,8 @@ import { attachAuth } from "./middleware/require-auth.js";
 import { globalRateLimit } from "./middleware/rate-limit.js";
 import healthRoutes from "./modules/health/routes.js";
 import authRoutes from "./modules/auth/routes.js";
+import postsRoutes from "./modules/posts/routes.js";
+import commentsRoutes from "./modules/comments/routes.js";
 
 import type { IncomingMessage, ServerResponse } from "node:http";
 
@@ -65,6 +67,8 @@ app.use("/api", healthRoutes);
 app.use("/api/v1", attachAuth, globalRateLimit);
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/posts", postsRoutes);
+app.use("/api/v1/comments", commentsRoutes);
 
 app.use(notFoundHandler);
 

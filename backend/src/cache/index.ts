@@ -10,7 +10,7 @@ export const CacheService = {
       if (raw === null) return null;
       return JSON.parse(raw) as T;
     } catch (err) {
-      logger.error({ err, key }, "CacheService.get failed (fail-open)");
+      logger.error({ err, key }, "CacheService.get failed");
       return null;
     }
   },
@@ -20,7 +20,7 @@ export const CacheService = {
       const raw = JSON.stringify(value);
       await redis.set(`${KEY_PREFIX}${key}`, raw, "EX", ttlSeconds);
     } catch (err) {
-      logger.error({ err, key }, "CacheService.set failed (fail-open)");
+      logger.error({ err, key }, "CacheService.set failed");
     }
   },
 
@@ -28,7 +28,7 @@ export const CacheService = {
     try {
       await redis.del(`${KEY_PREFIX}${key}`);
     } catch (err) {
-      logger.error({ err, key }, "CacheService.del failed (fail-open)");
+      logger.error({ err, key }, "CacheService.del failed");
     }
   },
 };

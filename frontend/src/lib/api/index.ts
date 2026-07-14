@@ -1,2 +1,2 @@
-export { apiFailure, apiSuccess, sendRequest } from "./client";
-export type { ApiResult } from "./client";
+export { apiFailure, apiSuccess, sendRequest } from "./server";
+export type { ApiResult } from "./server";

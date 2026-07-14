@@ -3,7 +3,14 @@ import Link from "next/link";
 
 import { LoginForm } from "@/components/auth/login-form";
 
-export default function Login() {
+export default async function Login({
+  searchParams,
+}: {
+  searchParams: Promise<{ registered?: string; redirect?: string }>;
+}) {
+  const params = await searchParams;
+  const justRegistered = params.registered === "1";
+
   return (
     <section className="_social_login_wrapper _layout_main_wrapper">
       <div className="_shape_one">
@@ -88,6 +95,15 @@ export default function Login() {
                 <h4 className="_social_login_content_title _titl4 _mar_b50">
                   Login to your account
                 </h4>
+                {justRegistered && (
+                  <p
+                    className="_social_login_content_para _mar_b40"
+                    role="status"
+                    style={{ color: "#16a34a" }}
+                  >
+                    Account created successfully. Please log in.
+                  </p>
+                )}
                 <button
                   type="button"
                   className="_social_login_content_btn _mar_b40"

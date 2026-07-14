@@ -2,8 +2,8 @@
 
 import { useActionState } from "react";
 
-import { loginAction } from "@/app/(auth)/actions";
-import type { AuthFormState } from "@/lib/auth";
+import { loginAction } from "@/lib/auth/actions";
+import type { AuthFormState } from "@/lib/auth/types";
 
 const initialState: AuthFormState = {};
 
@@ -27,6 +27,7 @@ export const LoginForm = () => {
               type="email"
               autoComplete="email"
               className="form-control _social_login_input"
+              defaultValue="ayan@gmail.com"
             />
             {state.errors?.email && (
               <p className="_social_login_error" aria-live="polite">
@@ -46,6 +47,7 @@ export const LoginForm = () => {
               type="password"
               autoComplete="current-password"
               className="form-control _social_login_input"
+              defaultValue="Password1!"
             />
             {state.errors?.password && (
               <p className="_social_login_error" aria-live="polite">
@@ -60,7 +62,7 @@ export const LoginForm = () => {
           <div className="form-check _social_login_form_check">
             <input
               className="form-check-input _social_login_form_check_input"
-              type="radio"
+              type="checkbox"
               name="rememberMe"
               id="rememberMe"
               defaultChecked

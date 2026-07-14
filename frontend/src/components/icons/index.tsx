@@ -141,18 +141,31 @@ export const ArticleIcon = () => {
   );
 };
 
-export const PostIcon = () => {
+export const PostIcon = ({
+  width = 14,
+  height = 13,
+  fill = "none",
+  pathfill = "#fff",
+  opacity = 1,
+}: {
+  width?: number;
+  height?: number;
+  fill?: string;
+  pathfill?: string;
+  opacity?: number;
+}) => {
   return (
     <svg
       className="_mar_img"
       xmlns="http://www.w3.org/2000/svg"
-      width="14"
-      height="13"
-      fill="none"
+      width={width}
+      height={height}
+      fill={fill}
       viewBox="0 0 14 13"
     >
       <path
-        fill="#fff"
+        fill={pathfill}
+        fillOpacity={opacity}
         fillRule="evenodd"
         d="M6.37 7.879l2.438 3.955a.335.335 0 00.34.162c.068-.01.23-.05.289-.247l3.049-10.297a.348.348 0 00-.09-.35.341.341 0 00-.34-.088L1.75 4.03a.34.34 0 00-.247.289.343.343 0 00.16.347L5.666 7.17 9.2 3.597a.5.5 0 01.712.703L6.37 7.88zM9.097 13c-.464 0-.89-.236-1.14-.641L5.372 8.165l-4.237-2.65a1.336 1.336 0 01-.622-1.331c.074-.536.441-.96.957-1.112L11.774.054a1.347 1.347 0 011.67 1.682l-3.05 10.296A1.332 1.332 0 019.098 13z"
         clipRule="evenodd"
@@ -241,6 +254,41 @@ export const ShareIcon = () => {
         stroke="#000"
         strokeLinejoin="round"
         d="M23 10.5L12.917 1v5.429C3.267 6.429 1 13.258 1 20c2.785-3.52 5.248-5.429 11.917-5.429V20L23 10.5z"
+      />
+    </svg>
+  );
+};
+
+export const ThumbsUpIcon = ({
+  width = 16,
+  height = 16,
+  fill = "none",
+  pathfill = "#fff",
+  opacity = 1,
+}: {
+  width?: number;
+  height?: number;
+  fill?: string;
+  pathfill?: string;
+  opacity?: number;
+}) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      fill={fill}
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="feather feather-thumbs-up"
+    >
+      <path
+        fill={pathfill}
+        fillOpacity={opacity}
+        d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"
       />
     </svg>
   );

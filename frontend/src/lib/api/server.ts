@@ -6,7 +6,8 @@ import axios, {
 } from "axios";
 import type { ZodType } from "zod";
 
-const API_BASE_URL = process.env.BACKEND_API_URL ?? "http://localhost:4000";
+const API_BASE_URL =
+  process.env.BACKEND_API_URL ?? "http://localhost:4000/api/v1";
 const DEFAULT_TIMEOUT_MS = 10_000;
 const MAX_RETRIES = 3;
 const RETRY_DELAY_BASE_MS = 300;
@@ -18,10 +19,14 @@ declare module "axios" {
   }
 }
 
-export type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string };
+export type ApiResult<T> =
+  | { ok: true; data: T; setCookies?: string[] }
+  | { ok: false; error: string };
 
-export function apiSuccess<T>(data: T): ApiResult<T> {
-  return { ok: true, data };
+export function apiSuccess<T>(data: T, setCookies?: string[]): ApiResult<T> {
+  return setCookies?.length
+    ? { ok: true, data, setCookies }
+    : { ok: true, data };
 }
 
 export function apiFailure(error: string): ApiResult<never> {
@@ -84,12 +89,19 @@ function extractErrorMessage(error: unknown): string {
   return ERROR_MESSAGES.generic;
 }
 
+function extractSetCookies(
+  headers: Record<string, unknown>,
+): string[] | undefined {
+  const raw = headers["set-cookie"];
+  if (!raw) return undefined;
+  return Array.isArray(raw) ? raw.map(String) : [String(raw)];
+}
+
 interface SendRequestOptions<T> extends Omit<AxiosRequestConfig, "url"> {
   responseSchema: ZodType<T>;
 }
 
-//Send a request through the HTTP client and validate the response
-
+/** Send a request through the HTTP client and validate the response. */
 export async function sendRequest<T>(
   url: string,
   { responseSchema, ...config }: SendRequestOptions<T>,
@@ -98,7 +110,7 @@ export async function sendRequest<T>(
     const response = await httpClient.request({ url, ...config });
     const parsed = responseSchema.safeParse(response.data);
     if (!parsed.success) return apiFailure(ERROR_MESSAGES.invalidResponse);
-    return apiSuccess(parsed.data);
+    return apiSuccess(parsed.data, extractSetCookies(response.headers));
   } catch (error) {
     return apiFailure(extractErrorMessage(error));
   }

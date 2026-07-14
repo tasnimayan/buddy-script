@@ -1,7 +1,6 @@
 "use client";
 
 import { memo, useState } from "react";
-import Image from "next/image";
 
 import { useAuth } from "@/lib/auth/store";
 import { displayName, formatRelativeTime } from "@/lib/posts/format";
@@ -12,9 +11,8 @@ import { CommentThread } from "./comment-thread";
 import { LikeButton } from "./like-button";
 import { LikeCountPreview } from "./like-count-preview";
 import { LikersModal } from "./likers-modal";
+import { PostMediaGallery } from "./post-media-gallery";
 import { UserAvatar } from "./user-avatar";
-
-const MEDIA_ASPECT = "16 / 9";
 
 interface PostCardProps {
   post: PostDto;
@@ -33,7 +31,9 @@ export const PostCard = memo(function PostCard({
   const [likersOpen, setLikersOpen] = useState(false);
 
   const isOwner = user?.id === post.author.id;
-  const primaryMedia = post.media[0];
+  const mediaUrls = [...post.media]
+    .sort((a, b) => a.position - b.position)
+    .map((item) => item.url);
 
   return (
     <div>
@@ -120,27 +120,7 @@ export const PostCard = memo(function PostCard({
               {post.content}
             </h4>
           )}
-          {primaryMedia && (
-            <div
-              className="_feed_inner_timeline_image"
-              style={{
-                position: "relative",
-                width: "100%",
-                aspectRatio: MEDIA_ASPECT,
-                overflow: "hidden",
-              }}
-            >
-              <Image
-                src={primaryMedia.url}
-                alt=""
-                fill
-                sizes="(max-width: 768px) 100vw, 600px"
-                className="_time_img"
-                style={{ objectFit: "cover" }}
-                loading="lazy"
-              />
-            </div>
-          )}
+          <PostMediaGallery urls={mediaUrls} />
         </div>
 
         {(post.likeCount > 0 || post.commentCount > 0) && (

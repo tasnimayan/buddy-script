@@ -27,7 +27,6 @@ export const LoginForm = () => {
               type="email"
               autoComplete="email"
               className="form-control _social_login_input"
-              defaultValue="ayan@gmail.com"
             />
             {state.errors?.email && (
               <p className="_social_login_error" aria-live="polite">
@@ -47,7 +46,6 @@ export const LoginForm = () => {
               type="password"
               autoComplete="current-password"
               className="form-control _social_login_input"
-              defaultValue="Password1!"
             />
             {state.errors?.password && (
               <p className="_social_login_error" aria-live="polite">

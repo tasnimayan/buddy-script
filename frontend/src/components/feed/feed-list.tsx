@@ -16,11 +16,6 @@ import { PostCard } from "./post-card";
 import { PostComposer } from "./post-composer";
 import { FeedStory } from "./feed-story";
 
-/**
- * Desktop: the middle column (`._layout_middle_wrap`) is an overflow:auto
- * scrollport. Mobile: the column often grows with content and the document
- * scrolls instead. Pick whichever element is actually (or will be) scrolling.
- */
 function resolveScrollElement(preferred: HTMLElement): HTMLElement {
   let node: HTMLElement | null = preferred;
   while (node && node !== document.body) {
@@ -112,11 +107,7 @@ export function FeedList() {
   useEffect(() => {
     const last = virtualItems[virtualItems.length - 1];
     if (!last) return;
-    if (
-      last.index >= posts.length - 1 &&
-      hasNextPage &&
-      !isFetchingNextPage
-    ) {
+    if (last.index >= posts.length - 1 && hasNextPage && !isFetchingNextPage) {
       void fetchNextPage();
     }
   }, [
@@ -138,9 +129,7 @@ export function FeedList() {
         )}
         {isError && (
           <p className="_previous_comment_txt _padd_l24" role="alert">
-            {error instanceof Error
-              ? error.message
-              : "Couldn't load the feed."}
+            {error instanceof Error ? error.message : "Couldn't load the feed."}
           </p>
         )}
         {!isLoading && !isError && posts.length === 0 && (

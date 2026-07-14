@@ -7,6 +7,7 @@ export interface ApiResponse<T = any> {
   error?: string;
   meta?: {
     page?: number;
+    nextCursor?: string;
     limit?: number;
     total?: number;
     totalPages?: number;
@@ -90,5 +91,9 @@ export class ResponseHandler {
       message,
       error: message,
     });
+  }
+
+  static noContent(res: Response, statusCode: number = 204): Response<void> {
+    return res.status(statusCode).end();
   }
 }

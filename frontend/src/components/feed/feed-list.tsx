@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 import { useDeletePost, usePostLike } from "@/lib/posts/use-post-mutations";
@@ -16,42 +10,13 @@ import { PostCard } from "./post-card";
 import { PostComposer } from "./post-composer";
 import { FeedStory } from "./feed-story";
 
-function resolveScrollElement(preferred: HTMLElement): HTMLElement {
-  let node: HTMLElement | null = preferred;
-  while (node && node !== document.body) {
-    const { overflowY } = getComputedStyle(node);
-    if (
-      overflowY === "auto" ||
-      overflowY === "scroll" ||
-      overflowY === "overlay"
-    ) {
-      if (node.scrollHeight > node.clientHeight + 1) {
-        return node;
-      }
-      // Constrained viewport that will scroll once content overflows (desktop).
-      const { height } = node.getBoundingClientRect();
-      if (height > 0 && height < window.innerHeight - 10) {
-        return node;
-      }
-    }
-    node = node.parentElement;
-  }
-  return document.documentElement;
-}
-
-function measureScrollMargin(list: HTMLElement, scrollEl: HTMLElement): number {
-  const listRect = list.getBoundingClientRect();
-  if (scrollEl === document.documentElement) {
-    return listRect.top + window.scrollY;
-  }
-  const scrollRect = scrollEl.getBoundingClientRect();
-  return listRect.top - scrollRect.top + scrollEl.scrollTop;
-}
-
 export function FeedList() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
-  const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const fetchingRef = useRef(false);
+
+  const armedRef = useRef(false);
   const [scrollMargin, setScrollMargin] = useState(0);
 
   const {
@@ -81,42 +46,67 @@ export function FeedList() {
     [deletePost],
   );
 
-  const rowCount = hasNextPage ? posts.length + 1 : posts.length;
+  fetchingRef.current = isFetchingNextPage;
 
-  useLayoutEffect(() => {
-    const preferred = scrollRef.current;
+  useEffect(() => {
+    const scrollEl = scrollRef.current;
     const list = listRef.current;
-    if (!preferred || !list) return;
+    if (!scrollEl || !list || isLoading) return;
 
-    const nextScrollEl = resolveScrollElement(preferred);
-    setScrollElement(nextScrollEl);
-    setScrollMargin(measureScrollMargin(list, nextScrollEl));
-  }, [isLoading, posts.length, rowCount]);
+    const measure = () => {
+      const listRect = list.getBoundingClientRect();
+      const scrollRect = scrollEl.getBoundingClientRect();
+      setScrollMargin(listRect.top - scrollRect.top + scrollEl.scrollTop);
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(scrollEl);
+    return () => ro.disconnect();
+  }, [isLoading]);
 
   const virtualizer = useVirtualizer({
-    count: rowCount,
-    getScrollElement: () => scrollElement,
+    count: posts.length,
+    getScrollElement: () => scrollRef.current,
     estimateSize: () => 420,
     overscan: 5,
     scrollMargin,
-    getItemKey: (index) => posts[index]?.id ?? "loader",
+    getItemKey: (index) => posts[index]?.id ?? index,
   });
 
-  const virtualItems = virtualizer.getVirtualItems();
+  const listHeight = posts.length === 0 ? 0 : virtualizer.getTotalSize();
 
   useEffect(() => {
-    const last = virtualItems[virtualItems.length - 1];
-    if (!last) return;
-    if (last.index >= posts.length - 1 && hasNextPage && !isFetchingNextPage) {
-      void fetchNextPage();
-    }
-  }, [
-    virtualItems,
-    posts.length,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-  ]);
+    const scrollEl = scrollRef.current;
+    const sentinel = sentinelRef.current;
+    if (!scrollEl || !sentinel || !hasNextPage || isLoading) return;
+
+    armedRef.current = false;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry) return;
+
+        // Arm only after the sentinel has left the scrollport. That means the
+        // feed is actually scrollable and the user (or layout) moved past end.
+        if (!entry.isIntersecting) {
+          armedRef.current = true;
+          return;
+        }
+
+        if (!armedRef.current || fetchingRef.current) return;
+        void fetchNextPage();
+      },
+      // Always observe against the column scrollport (overflow: auto), never the
+      // viewport — otherwise a flex-shrunk list keeps the sentinel on-screen.
+      { root: scrollEl, rootMargin: "0px", threshold: 0 },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isLoading, fetchNextPage]);
+
+  const virtualItems = virtualizer.getVirtualItems();
 
   return (
     <div className="_layout_middle_wrap" ref={scrollRef}>
@@ -142,13 +132,14 @@ export function FeedList() {
           ref={listRef}
           style={{
             position: "relative",
-            height: virtualizer.getTotalSize(),
+            flexShrink: 0,
+            height: listHeight,
             width: "100%",
           }}
         >
           {virtualItems.map((item) => {
-            const isLoader = item.index >= posts.length;
             const post = posts[item.index];
+            if (!post) return null;
 
             return (
               <div
@@ -160,24 +151,29 @@ export function FeedList() {
                   top: 0,
                   left: 0,
                   width: "100%",
-                  transform: `translateY(${item.start - virtualizer.options.scrollMargin}px)`,
+                  transform: `translateY(${item.start - scrollMargin}px)`,
                 }}
               >
-                {isLoader ? (
-                  <p className="_previous_comment_txt _padd_l24">
-                    {isFetchingNextPage ? "Loading more…" : null}
-                  </p>
-                ) : post ? (
-                  <PostCard
-                    post={post}
-                    onToggleLike={onToggleLike}
-                    onDelete={onDelete}
-                  />
-                ) : null}
+                <PostCard
+                  post={post}
+                  onToggleLike={onToggleLike}
+                  onDelete={onDelete}
+                />
               </div>
             );
           })}
         </div>
+
+        {hasNextPage && !isLoading && (
+          <div
+            ref={sentinelRef}
+            aria-hidden
+            style={{ height: 1, width: "100%", flexShrink: 0 }}
+          />
+        )}
+        {isFetchingNextPage && (
+          <p className="_previous_comment_txt _padd_l24">Loading more…</p>
+        )}
       </div>
     </div>
   );

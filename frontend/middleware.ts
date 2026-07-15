@@ -67,6 +67,6 @@ export const config = {
     "/login",
     "/registration",
     "/feed/:path*",
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };

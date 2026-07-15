@@ -23,6 +23,31 @@ type Envelope = {
 };
 
 let refreshPromise: Promise<boolean> | null = null;
+export function getBackendApiBaseUrl(): string {
+  const raw = (
+    process.env.BACKEND_API_URL ?? "http://localhost:4000/api/v1"
+  ).replace(/\/$/, "");
+
+  return /\/api\/v1$/.test(raw) ? raw : `${raw}/api/v1`;
+}
+
+/**
+ * Join a path onto the API base. Accepts `/feed`, `/api/v1/feed`, or absolute URLs.
+ */
+export function resolveBackendApiUrl(path: string): string {
+  if (/^https?:\/\//i.test(path)) return path;
+
+  const base = getBackendApiBaseUrl();
+  let pathname = path.startsWith("/") ? path : `/${path}`;
+
+  if (pathname.startsWith("/api/v1/")) {
+    pathname = pathname.slice("/api/v1".length);
+  } else if (pathname === "/api/v1") {
+    pathname = "/";
+  }
+
+  return `${base}${pathname}`;
+}
 
 async function refreshSession(): Promise<boolean> {
   if (!refreshPromise) {
@@ -106,10 +131,10 @@ export async function apiFetch<T>(
     headers.set("Content-Type", "application/json");
   }
 
-  const res = await fetch(path, {
+  const res = await fetch(resolveBackendApiUrl(path), {
     ...init,
     headers,
-    credentials: "same-origin",
+    credentials: "include",
   });
 
   if (res.status === 401 && !retried) {

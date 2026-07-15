@@ -6,8 +6,7 @@ import axios, {
 } from "axios";
 import type { ZodType } from "zod";
 
-const API_BASE_URL =
-  process.env.BACKEND_API_URL ?? "http://localhost:4000/api/v1";
+const API_BASE_URL = process.env.BACKEND_API_URL!;
 const DEFAULT_TIMEOUT_MS = 10_000;
 const MAX_RETRIES = 3;
 const RETRY_DELAY_BASE_MS = 300;

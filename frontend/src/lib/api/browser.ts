@@ -24,8 +24,7 @@ type Envelope = {
 
 let refreshPromise: Promise<boolean> | null = null;
 export function getBackendApiBaseUrl(): string {
-  const raw = (
-    process.env.BACKEND_API_URL ??
+  const raw = ( 
     process.env.NEXT_PUBLIC_BACKEND_API_URL ?? "http://localhost:4000/api/v1"
   ).replace(/\/$/, "");
 
